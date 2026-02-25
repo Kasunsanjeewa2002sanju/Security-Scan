@@ -12,7 +12,8 @@
 
 // ── MongoDB Atlas connection string ────────────────────────
 // Password "$c@n@pp" URL-encoded → "%24c%40n%40pp"
-define('MONGODB_URI',   'mongodb+srv://appuser:%24c%40n%40pp@cluster0.uzdoc9v.mongodb.net/?appName=Cluster0');
+$hardcodedUri = 'mongodb+srv://appuser:%24c%40n%40pp@cluster0.uzdoc9v.mongodb.net/?appName=Cluster0';
+define('MONGODB_URI', getenv('MONGODB_URI') ?: $hardcodedUri);
 define('MONGODB_DB',    'hacki_app');           // Database name
 define('MONGODB_COLL',  'users');               // Collection name
 // ────────────────────────────────────────────────────────────

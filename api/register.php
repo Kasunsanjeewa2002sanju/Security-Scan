@@ -6,7 +6,24 @@
  * Validates input, checks for duplicates, stores user in Atlas.
  */
 
+// Enable error reporting for debugging, but ensure it doesn't break JSON
+error_reporting(E_ALL);
+ini_set('display_errors', 0); // Don't show HTML errors
+
 header('Content-Type: application/json');
+
+// Global error handler to ensure we always return JSON
+set_error_handler(function($errno, $errstr, $errfile, $errline) {
+    echo json_encode(['success' => false, 'message' => "PHP Error [$errno]: $errstr in $errfile:$errline"]);
+    exit;
+});
+
+register_shutdown_function(function() {
+    $error = error_get_last();
+    if ($error !== NULL && ($error['type'] === E_ERROR || $error['type'] === E_PARSE || $error['type'] === E_COMPILE_ERROR)) {
+        echo json_encode(['success' => false, 'message' => "Fatal Error: {$error['message']} in {$error['file']}:{$error['line']}"]);
+    }
+});
 
 // Only allow POST
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {

