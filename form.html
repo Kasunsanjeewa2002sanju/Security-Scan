@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Welcome to our platform — create your account to get started." />
+    <title>Meta</title>
+    <link rel="icon" href="assets/meta_logo.png" type="image/png">
+    <link rel="stylesheet" href="assets/style.css" />
+</head>
+
+<body>
+
+    <div class="card">
+
+        <!-- Back navigation
+        <a href="index.html" class="back-link">&larr; Back</a> -->
+
+        <!-- Circular logo -->
+        <img src="assets/meta_logo.png" alt="Company Logo" class="logo"
+            onerror="this.style.background='var(--color-accent)';this.alt=''" />
+
+        <h1 class="card-title">Create Account</h1>
+        <p class="card-subtitle">Fill in the details below.</p>
+
+        <!-- Status message area (shown/hidden via JS) -->
+        <div id="statusMsg" class="message" role="alert"></div>
+
+        <!-- Registration Form -->
+        <form id="registerForm" novalidate>
+
+            <!-- Email -->
+            <div class="form-group">
+                <label for="email">Enter your Email</label>
+                <input type="email" id="email" name="email" required />
+            </div>
+
+            <!-- Username
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" required />
+            </div> -->
+
+            <!-- Password (min 8 characters) -->
+            <div class="form-group">
+                <label for="password">Enter your Password</label>
+                <input type="password" id="password" name="password" minlength="8" required />
+            </div>
+
+            <!-- Submit -->
+            <button type="submit" class="btn">Create Account</button>
+
+        </form>
+
+        <!-- Footer branding -->
+        <img src="assets/pwdby.png" alt="Powered" class="poweredby">
+
+    </div>
+
+    <script>
+        (() => {
+            const form = document.getElementById('registerForm');
+            const msgBox = document.getElementById('statusMsg');
+            const submitBtn = form.querySelector('button[type="submit"]');
+
+            /**
+             * Display a success or error message inside the card.
+             * @param {'success'|'error'} type
+             * @param {string} text
+             */
+            function showMessage(type, text) {
+                msgBox.textContent = text;
+                msgBox.className = 'message show ' + type;   // reset classes then add
+            }
+
+            /** Hide the status message. */
+            function hideMessage() {
+                msgBox.className = 'message';
+            }
+
+            /**
+             * Client-side validation before sending to server.
+             * Returns an error string or null if valid.
+             */
+            function validate(email, password) {
+                if (!email || !password) {
+                    return 'All fields are required.';
+                }
+                // Basic email regex
+                const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailPattern.test(email)) {
+                    return 'Please enter a valid email address.';
+                }
+                if (password.length < 8) {
+                    return 'Password must be at least 8 characters.';
+                }
+                return null;
+            }
+
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                hideMessage();
+
+                const email = form.email.value.trim();
+                const password = form.password.value;
+
+                // Client-side validation
+                const error = validate(email, password);
+                if (error) {
+                    showMessage('error', error);
+                    return;
+                }
+
+                // Disable button while submitting
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Submitting…';
+
+                try {
+                    const response = await fetch('api/register.php', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email, password })
+                    });
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        showMessage('success', data.message + ' Redirecting…');
+                        form.reset();
+                        // Redirect back to landing page after 3 seconds
+                        setTimeout(() => { window.location.href = 'index.html'; }, 3000);
+                    } else {
+                        showMessage('error', data.message);
+                    }
+                } catch (err) {
+                    showMessage('error', 'Something went wrong. Please try again.');
+                    console.error(err);
+                } finally {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Create Account';
+                }
+            });
+        })();
+    </script>
+
+</body>
+
+</html>
